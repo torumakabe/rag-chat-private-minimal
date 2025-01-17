@@ -40,6 +40,14 @@
 
 ## 利用手順
 
+### ネットワークアドレス空間の確認
+
+接続するプライベートネットワークに合わせ、仮想ネットワークのアドレス空間とサブネット範囲、クライアントアドレスプールを調整してください。設定は[main.bicep](infra/main.bicep)の下記moduleにあります。
+
+- appVnet
+- gwVnet(VPNを使う場合)
+- virtualNetworkGateway(VPNを使う場合)
+
 ### 環境構築
 
 リポジトリのルートディレクトリで、以下のAzure Developer CLIコマンドを実行します。
