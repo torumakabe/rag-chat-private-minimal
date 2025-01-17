@@ -1,0 +1,51 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Admin site",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "streamlit",
+      "args": ["run", "app.py"],
+      "cwd": "${workspaceFolder}/app/admin",
+      "env": {
+        "AZURE_WEBAPP_ENVIRONMENT": "Development",
+        "AZURITE_ACCOUNT_KEY": "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
+      },
+      "envFile": "${input:dotEnvFilePath}",
+      "preLaunchTask": "pip install (Admin site)"
+    },
+    {
+      "name": "Launch Frontend site",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "streamlit",
+      "args": ["run", "app.py"],
+      "cwd": "${workspaceFolder}/app/frontend",
+      "env": {
+        "CHAT_API_ENDPOINT": "http://localhost:7071/api/chat",
+        "AZURE_WEBAPP_ENVIRONMENT": "Development",
+        "AZURITE_ACCOUNT_KEY": "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
+      },
+      "envFile": "${input:dotEnvFilePath}",
+      "preLaunchTask": "pip install (Frontend site)"
+    },
+    {
+      "name": "Attach to Backend Functions",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 9091
+      },
+      "preLaunchTask": "func: host start"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "dotEnvFilePath",
+      "type": "command",
+      "command": "azure-dev.commands.getDotEnvFilePath"
+    }
+  ]
+}

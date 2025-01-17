@@ -1,0 +1,60 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "${AZURE_ENV_NAME}"
+    },
+    "resourceGroupName": {
+      "value": "${AZURE_RESOURCE_GROUP}"
+    },
+    "location": {
+      "value": "${AZURE_LOCATION}"
+    },
+    "appServicePlanName": {
+      "value": "${AZURE_APP_SERVICE_PLAN}"
+    },
+    "appServiceSkuName": {
+      "value": "${AZURE_APP_SERVICE_SKU=P2V3}"
+    },
+    "allowedOrigin": {
+      "value": "${ALLOWED_ORIGIN}"
+    },
+    "storageAccountName": {
+      "value": "${AZURE_STORAGE_ACCOUNT_NAME}"
+    },
+    "azureOpenAIApiVersion": {
+      "value": "${AZURE_OPENAI_API_VERSION=2024-10-21}"
+    },
+    "azureOpenAIGenerativeModel": {
+      "value": "${AZURE_OPENAI_GENERATIVE_MODEL=gpt-4o}"
+    },
+    "azureOpenAIGenerativeModelVersion": {
+      "value": "${AZURE_OPENAI_GENERATIVE_MODEL_VERSION=2024-08-06}"
+    },
+    "azureOpenAIGenerativeModelDeployType": {
+      "value": "${AZURE_OPENAI_GENERATIVE_MODEL_DEPLOY_TYPE=GlobalStandard}"
+    },
+    "azureOpenAIEmbeddingModel": {
+      "value": "${AZURE_OPENAI_EMBEDDING_MODEL=text-embedding-ada-002}"
+    },
+    "azureOpenAIEmbeddingModelVesion": {
+      "value": "${AZURE_OPENAI_EMBEDDING_MODEL_VERSION=2}"
+    },
+    "azureOpenAIEmbeddingModelDeployType": {
+      "value": "${AZURE_OPENAI_EMBEDDING_MODEL_DEPLOY_TYPE=Standard}"
+    },
+    "azureSearchIndexName":{
+      "value": "${AZURE_SEARCH_INDEX_NAME=rag-chat-private-minimal}"
+    },
+    "useVpn": {
+      "value": "${USE_VPN=false}"
+    },
+    "useVM": {
+      "value": "${USE_VM=false}"
+    },
+    "useAppGw": {
+      "value": "${USE_APPGW=false}"
+    }
+  }
+}
