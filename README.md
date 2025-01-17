@@ -68,7 +68,7 @@ Application GatewayのフロントエンドはHTTPのみ構成されます。App
 
 ### アプリケーションのデプロイ
 
-環境構築を実行するマシンが構築タイミングでプライベートネットワークに接続していないケースを考慮し、`azd up`や`azd deploy`での「環境構築とアプリケーションデプロイメントの同時実行」は行いません。アプリケーションは[VS Code拡張](https://github.com/Microsoft/vscode-azureappservice)などでデプロイしてください。
+環境構築を実行するマシンが構築タイミングでプライベートネットワークに接続していないケースを考慮し、`azd up`での「環境構築とアプリケーションデプロイメントの同時実行」は行いません。アプリケーションは[VS Code拡張](https://github.com/Microsoft/vscode-azureappservice)などでデプロイしてください。
 
 なお、ドキュメントのインデクシング前にAI Searchのインデックス設定が必要です。[インデックス設定Pythonスクリプト](scripts/search/create_index.py)を実行してください。
 
@@ -84,7 +84,7 @@ Application GatewayのフロントエンドはHTTPのみ構成されます。App
 - Azure外での名前解決は、適宜DNSやhostsを設定してください。
   - 参考: [hostsを作るbashスクリプト](scripts/util/hosts/gen_hosts.sh)
   - 参考: [hostsを作るPowerShellスクリプト](scripts/util/hosts/gen_hosts.ps1)
-- Application Insightsの自動計装に[現在不具合がある](https://github.com/Azure/azure-sdk-for-python/issues/37790#issuecomment-2448213164)ため、コードで計装しています。
+- App Service/Azure SDK for Python/Application Insightsの自動計装に[現在不具合がある](https://github.com/Azure/azure-sdk-for-python/issues/37790#issuecomment-2448213164)ため、コードで計装しています。
 - 各リソースの診断設定は未設定です。必要に応じて設定してください。
 
 ## 拡充例
