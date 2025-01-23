@@ -64,7 +64,7 @@ var aadTenant = '${environment().authentication.loginEndpoint}${tenant().tenantI
 var aadAudience = 'c632b3df-fb67-4d84-bdcf-b95ad541b5c8' // Azure Public
 var aadIssuer = 'https://sts.windows.net/${tenant().tenantId}/'
 
-resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+resource targetResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: !empty(resourceGroupName) ? resourceGroupName : '${abbrs.resourcesResourceGroups}${environmentName}'
   location: location
   tags: tags
@@ -72,7 +72,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 
 module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.9.1' = {
   name: 'logAnalyticsWorkspaceDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     name: '${abbrs.operationalInsightsWorkspaces}${resourceToken}'
     location: location
@@ -82,7 +82,7 @@ module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0
 
 module appInsights 'br/public:avm/res/insights/component:0.4.2' = {
   name: 'appInsightsDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     name: '${abbrs.insightsComponents}${resourceToken}'
     workspaceResourceId: logAnalyticsWorkspace.outputs.resourceId
@@ -93,7 +93,7 @@ module appInsights 'br/public:avm/res/insights/component:0.4.2' = {
 
 module appVnet 'br/public:avm/res/network/virtual-network:0.5.2' = {
   name: 'appVirtualNetworkDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     addressPrefixes: [
       '10.0.0.0/16'
@@ -135,7 +135,7 @@ module appVnet 'br/public:avm/res/network/virtual-network:0.5.2' = {
 
 module gwVnet 'br/public:avm/res/network/virtual-network:0.5.2' = if (useVpn) {
   name: 'gwVirtualNetworkDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     addressPrefixes: [
       '10.1.0.0/16'
@@ -153,7 +153,7 @@ module gwVnet 'br/public:avm/res/network/virtual-network:0.5.2' = if (useVpn) {
 }
 
 module virtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:0.5.0' = if (useVpn) {
-  scope: resourceGroup
+  scope: targetResourceGroup
   name: 'virtualNetworkGatewayDeployment'
   params: {
     clusterSettings: {
@@ -184,7 +184,7 @@ module virtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:
 
 module storageBlobPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.7.0' = {
   name: 'storageBlobPrivateDnsZoneDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     name: 'privatelink.blob.${environment().suffixes.storage}'
     tags: tags
@@ -198,7 +198,7 @@ module storageBlobPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.7
 
 module storageQueuePrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.7.0' = {
   name: 'storageQueuePrivateDnsZoneDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     name: 'privatelink.queue.${environment().suffixes.storage}'
     tags: tags
@@ -212,7 +212,7 @@ module storageQueuePrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.
 
 module storageAccount 'br/public:avm/res/storage/storage-account:0.15.0' = {
   name: 'storageAccountDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     name: !empty(storageAccountName) ? storageAccountName : '${abbrs.storageStorageAccounts}${resourceToken}'
     kind: 'StorageV2'
@@ -255,7 +255,7 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.15.0' = {
 
 module serverfarm 'br/public:avm/res/web/serverfarm:0.4.1' = {
   name: 'serverfarmDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     name: !empty(appServicePlanName) ? appServicePlanName : '${abbrs.webServerFarms}${resourceToken}'
     location: location
@@ -269,7 +269,7 @@ module serverfarm 'br/public:avm/res/web/serverfarm:0.4.1' = {
 
 module sitesPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.7.0' = {
   name: 'sitesPrivateDnsZoneDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     name: 'privatelink.azurewebsites.net'
     tags: tags
@@ -287,7 +287,7 @@ var appEnvVariables = {
 
 module frontend 'br/public:avm/res/web/site:0.13.0' = {
   name: 'frontendSiteDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     kind: 'app,linux'
     name: '${abbrs.webSitesAppService}frontend-${resourceToken}'
@@ -330,7 +330,7 @@ module frontend 'br/public:avm/res/web/site:0.13.0' = {
 }
 
 module frontendToStorageRoleAssignment 'core/security/role-storageaccount.bicep' = {
-  scope: resourceGroup
+  scope: targetResourceGroup
   name: 'frontendToStorageRoleAssignment'
   params: {
     storageAccountName: storageAccount.outputs.name
@@ -342,7 +342,7 @@ module frontendToStorageRoleAssignment 'core/security/role-storageaccount.bicep'
 
 module admin 'br/public:avm/res/web/site:0.13.0' = {
   name: 'adminSiteDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     kind: 'app,linux'
     name: '${abbrs.webSitesAppService}admin-${resourceToken}'
@@ -386,7 +386,7 @@ module admin 'br/public:avm/res/web/site:0.13.0' = {
 }
 
 module adminToStorageRoleAssignment 'core/security/role-storageaccount.bicep' = {
-  scope: resourceGroup
+  scope: targetResourceGroup
   name: 'adminToStorageRoleAssignment'
   params: {
     storageAccountName: storageAccount.outputs.name
@@ -398,7 +398,7 @@ module adminToStorageRoleAssignment 'core/security/role-storageaccount.bicep' = 
 
 module backend 'br/public:avm/res/web/site:0.13.0' = {
   name: 'backendSiteDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     kind: 'functionapp,linux'
     name: '${abbrs.webSitesFunctions}backend-${resourceToken}'
@@ -454,7 +454,7 @@ module backend 'br/public:avm/res/web/site:0.13.0' = {
 }
 
 module backendToStorageRoleAssignment1 'core/security/role-storageaccount.bicep' = {
-  scope: resourceGroup
+  scope: targetResourceGroup
   name: 'backendToStorageRoleAssignment1'
   params: {
     storageAccountName: storageAccount.outputs.name
@@ -465,7 +465,7 @@ module backendToStorageRoleAssignment1 'core/security/role-storageaccount.bicep'
 }
 
 module backendToStorageRoleAssignment2 'core/security/role-storageaccount.bicep' = {
-  scope: resourceGroup
+  scope: targetResourceGroup
   name: 'backendToStorageRoleAssignment2'
   params: {
     storageAccountName: storageAccount.outputs.name
@@ -476,7 +476,7 @@ module backendToStorageRoleAssignment2 'core/security/role-storageaccount.bicep'
 }
 
 module backendToStorageRoleAssignment3 'core/security/role-storageaccount.bicep' = {
-  scope: resourceGroup
+  scope: targetResourceGroup
   name: 'backendToStorageRoleAssignment3'
   params: {
     storageAccountName: storageAccount.outputs.name
@@ -487,7 +487,7 @@ module backendToStorageRoleAssignment3 'core/security/role-storageaccount.bicep'
 }
 
 module backendToOaiRoleAssignment 'core/security/role-cogaccount.bicep' = {
-  scope: resourceGroup
+  scope: targetResourceGroup
   name: 'backendToOaiRoleAssignment'
   params: {
     cogServiceAccountName: oaiCogAccount.outputs.name
@@ -498,7 +498,7 @@ module backendToOaiRoleAssignment 'core/security/role-cogaccount.bicep' = {
 }
 
 module backendToDIRoleAssignment 'core/security/role-cogaccount.bicep' = {
-  scope: resourceGroup
+  scope: targetResourceGroup
   name: 'backendToDIRoleAssignment'
   params: {
     cogServiceAccountName: docIntelliCogAccount.outputs.name
@@ -509,7 +509,7 @@ module backendToDIRoleAssignment 'core/security/role-cogaccount.bicep' = {
 }
 
 module backendToSearchRoleAssignment1 'core/security/role-search.bicep' = {
-  scope: resourceGroup
+  scope: targetResourceGroup
   name: 'backendToSearchRoleAssignment1'
   params: {
     searchServiceName: searchService.outputs.name
@@ -520,7 +520,7 @@ module backendToSearchRoleAssignment1 'core/security/role-search.bicep' = {
 }
 
 module backendToSearchRoleAssignment2 'core/security/role-search.bicep' = {
-  scope: resourceGroup
+  scope: targetResourceGroup
   name: 'backendToSearchRoleAssignment2'
   params: {
     searchServiceName: searchService.outputs.name
@@ -532,7 +532,7 @@ module backendToSearchRoleAssignment2 'core/security/role-search.bicep' = {
 
 module oaiPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.7.0' = {
   name: 'oaiPrivateDnsZoneDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     name: 'privatelink.openai.azure.com'
     tags: tags
@@ -546,7 +546,7 @@ module oaiPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.7.0' = {
 
 module oaiCogAccount 'br/public:avm/res/cognitive-services/account:0.9.1' = {
   name: 'oaiCognitiveAccountDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     kind: 'OpenAI'
     name: '${abbrs.cognitiveServicesAccounts}oai-${resourceToken}'
@@ -597,7 +597,7 @@ module oaiCogAccount 'br/public:avm/res/cognitive-services/account:0.9.1' = {
 
 module cognitivePrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.7.0' = {
   name: 'cognitivePrivateDnsZoneDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     name: 'privatelink.cognitiveservices.azure.com'
     tags: tags
@@ -611,7 +611,7 @@ module cognitivePrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.7.0
 
 module docIntelliCogAccount 'br/public:avm/res/cognitive-services/account:0.9.1' = {
   name: 'docIntelliCognitiveAccountDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     kind: 'FormRecognizer'
     name: '${abbrs.cognitiveServicesDocumentIntelligence}${resourceToken}'
@@ -637,7 +637,7 @@ module docIntelliCogAccount 'br/public:avm/res/cognitive-services/account:0.9.1'
 
 module cosmosPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.7.0' = {
   name: 'cosmosPrivateDnsZoneDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     name: 'privatelink.documents.azure.com'
     tags: tags
@@ -651,7 +651,7 @@ module cosmosPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.7.0' =
 
 module cosmosDbAccount 'br/public:avm/res/document-db/database-account:0.10.1' = {
   name: 'databaseAccountDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     name: '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
     location: location
@@ -698,7 +698,7 @@ module cosmosDbAccount 'br/public:avm/res/document-db/database-account:0.10.1' =
 
 module searchPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.7.0' = {
   name: 'searchPrivateDnsZoneDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     name: 'privatelink.search.windows.net'
     tags: tags
@@ -712,7 +712,7 @@ module searchPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.7.0' =
 
 module searchService 'br/public:avm/res/search/search-service:0.8.2' = {
   name: 'searchServiceDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     name: '${abbrs.searchSearchServices}${resourceToken}'
     location: location
@@ -740,7 +740,7 @@ module searchService 'br/public:avm/res/search/search-service:0.8.2' = {
 
 module vaultPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.7.0' = {
   name: 'vaultPrivateDnsZoneDeployment'
-  scope: resourceGroup
+  scope: targetResourceGroup
   params: {
     name: 'privatelink.vaultcore.azure.net'
     tags: tags
@@ -753,7 +753,7 @@ module vaultPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.7.0' = 
 }
 
 module vault 'br/public:avm/res/key-vault/vault:0.11.1' = {
-  scope: resourceGroup
+  scope: targetResourceGroup
   name: 'vaultDeployment'
   params: {
     name: '${abbrs.keyVaultVaults}${resourceToken}'
@@ -778,7 +778,7 @@ module vault 'br/public:avm/res/key-vault/vault:0.11.1' = {
 }
 
 module virtualMachine 'br/public:avm/res/compute/virtual-machine:0.11.0' = if (useVM) {
-  scope: resourceGroup
+  scope: targetResourceGroup
   name: 'virtualMachineDeployment'
   params: {
     adminUsername: _vmAdminUserName
@@ -828,7 +828,7 @@ module virtualMachine 'br/public:avm/res/compute/virtual-machine:0.11.0' = if (u
 
 // For outbound only
 module appGwPublicIpAddress 'br/public:avm/res/network/public-ip-address:0.7.1' = if (useAppGw) {
-  scope: resourceGroup
+  scope: targetResourceGroup
   name: 'appGwPublicIpAddressDeployment'
   params: {
     name: '${abbrs.networkPublicIPAddresses}appgw-${resourceToken}'
@@ -837,7 +837,7 @@ module appGwPublicIpAddress 'br/public:avm/res/network/public-ip-address:0.7.1' 
 }
 
 module applicationGateway 'br/public:avm/res/network/application-gateway:0.5.1' = if (useAppGw) {
-  scope: resourceGroup
+  scope: targetResourceGroup
   name: 'applicationGatewayDeployment'
   params: {
     name: '${abbrs.networkApplicationGateways}${resourceToken}'
@@ -922,7 +922,7 @@ module applicationGateway 'br/public:avm/res/network/application-gateway:0.5.1' 
           frontendIPConfiguration: {
             id: resourceId(
               subscription().subscriptionId,
-              resourceGroup.name,
+              targetResourceGroup.name,
               'Microsoft.Network/applicationGateways/frontendIPConfigurations',
               '${abbrs.networkApplicationGateways}${resourceToken}',
               'private'
@@ -931,7 +931,7 @@ module applicationGateway 'br/public:avm/res/network/application-gateway:0.5.1' 
           frontendPort: {
             id: resourceId(
               subscription().subscriptionId,
-              resourceGroup.name,
+              targetResourceGroup.name,
               'Microsoft.Network/applicationGateways/frontendPorts',
               '${abbrs.networkApplicationGateways}${resourceToken}',
               'port80'
@@ -948,7 +948,7 @@ module applicationGateway 'br/public:avm/res/network/application-gateway:0.5.1' 
           frontendIPConfiguration: {
             id: resourceId(
               subscription().subscriptionId,
-              resourceGroup.name,
+              targetResourceGroup.name,
               'Microsoft.Network/applicationGateways/frontendIPConfigurations',
               '${abbrs.networkApplicationGateways}${resourceToken}',
               'private'
@@ -957,7 +957,7 @@ module applicationGateway 'br/public:avm/res/network/application-gateway:0.5.1' 
           frontendPort: {
             id: resourceId(
               subscription().subscriptionId,
-              resourceGroup.name,
+              targetResourceGroup.name,
               'Microsoft.Network/applicationGateways/frontendPorts',
               '${abbrs.networkApplicationGateways}${resourceToken}',
               'port80'
@@ -976,7 +976,7 @@ module applicationGateway 'br/public:avm/res/network/application-gateway:0.5.1' 
           backendAddressPool: {
             id: resourceId(
               subscription().subscriptionId,
-              resourceGroup.name,
+              targetResourceGroup.name,
               'Microsoft.Network/applicationGateways/backendAddressPools',
               '${abbrs.networkApplicationGateways}${resourceToken}',
               'frontendBackendPool'
@@ -985,7 +985,7 @@ module applicationGateway 'br/public:avm/res/network/application-gateway:0.5.1' 
           backendHttpSettings: {
             id: resourceId(
               subscription().subscriptionId,
-              resourceGroup.name,
+              targetResourceGroup.name,
               'Microsoft.Network/applicationGateways/backendHttpSettingsCollection',
               '${abbrs.networkApplicationGateways}${resourceToken}',
               'httpsSetting'
@@ -994,7 +994,7 @@ module applicationGateway 'br/public:avm/res/network/application-gateway:0.5.1' 
           httpListener: {
             id: resourceId(
               subscription().subscriptionId,
-              resourceGroup.name,
+              targetResourceGroup.name,
               'Microsoft.Network/applicationGateways/httpListeners',
               '${abbrs.networkApplicationGateways}${resourceToken}',
               'httpFrontend'
@@ -1010,7 +1010,7 @@ module applicationGateway 'br/public:avm/res/network/application-gateway:0.5.1' 
           backendAddressPool: {
             id: resourceId(
               subscription().subscriptionId,
-              resourceGroup.name,
+              targetResourceGroup.name,
               'Microsoft.Network/applicationGateways/backendAddressPools',
               '${abbrs.networkApplicationGateways}${resourceToken}',
               'adminBackendPool'
@@ -1019,7 +1019,7 @@ module applicationGateway 'br/public:avm/res/network/application-gateway:0.5.1' 
           backendHttpSettings: {
             id: resourceId(
               subscription().subscriptionId,
-              resourceGroup.name,
+              targetResourceGroup.name,
               'Microsoft.Network/applicationGateways/backendHttpSettingsCollection',
               '${abbrs.networkApplicationGateways}${resourceToken}',
               'httpsSetting'
@@ -1028,7 +1028,7 @@ module applicationGateway 'br/public:avm/res/network/application-gateway:0.5.1' 
           httpListener: {
             id: resourceId(
               subscription().subscriptionId,
-              resourceGroup.name,
+              targetResourceGroup.name,
               'Microsoft.Network/applicationGateways/httpListeners',
               '${abbrs.networkApplicationGateways}${resourceToken}',
               'httpAdmin'
