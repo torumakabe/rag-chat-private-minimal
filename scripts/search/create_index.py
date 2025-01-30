@@ -1,12 +1,10 @@
 """
 Azure AI Searchのインデックスを作成する。
 
-使用方法: python create_index.py <search_service_name> <index_name>
-引数:
-    search_service_name: Azure AI Searchのサービス名
-    index_name: 作成するインデックスの名前
+使用方法: python create_index.py
 """
 
+import os
 import sys
 from azure.identity import DefaultAzureCredential
 from azure.search.documents.indexes import SearchIndexClient
@@ -19,13 +17,29 @@ from azure.search.documents.indexes.models import (
     SearchIndex,
 )
 
-if len(sys.argv) != 3:
-    print("Usage: python create_index.py <search_service_name> <index_name>")
-    sys.exit(1)
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'app', 'backend'))
+)
 
-search_service_name = sys.argv[1]
+from helpers.load_azd_env import load_azd_env
+
+
+def check_env_var(name: str) -> str:
+    """
+    環境変数が設定されているかを確認し、値を返す。
+    設定されていない場合は例外を返す。
+    """
+    value = os.getenv(name)
+    if not value:
+        raise ValueError(f"{name} is not set or empty")
+    return value
+
+
+load_azd_env()
+
+search_service_name = check_env_var("AZURE_SEARCH_SERVICE_NAME")
 search_endpoint = f"https://{search_service_name}.search.windows.net"
-index_name = sys.argv[2]
+search_index_name = check_env_var("AZURE_SEARCH_INDEX_NAME")
 
 credential = DefaultAzureCredential()
 
@@ -79,6 +93,6 @@ vector_search = VectorSearch(
     ],
 )
 
-index = SearchIndex(name=index_name, fields=fields, vector_search=vector_search)
+index = SearchIndex(name=search_index_name, fields=fields, vector_search=vector_search)
 result = index_client.create_or_update_index(index)
 print(f"{result.name} created")
