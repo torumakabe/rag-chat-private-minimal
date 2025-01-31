@@ -25,30 +25,30 @@
 
 ## ステップ ②：VPN 接続
 
-1. **ルート証明書**と**クライアント**証明書を作成します（以下は Windows PowerShell 例）。
+1. Azure ポータルで **仮想ネットワーク ゲートウェイ** リソースを開き、「**ポイント対サイトの構成**」ブレードに進みます。
+2. 「**構成**」タブで以下の設定を行います。
+   
+    - **トンネルの種類**：**OpenVPN (SSL)**
+    - **認証の種類**：**Azure Active Directory** (Entra ID)
+    - **Azure Active Directory** (Entra ID) の情報は、[こちら](https://learn.microsoft.com/ja-jp/azure/vpn-gateway/point-to-site-entra-gateway#configure-vpn) のドキュメントを参考にテナント ID を使って設定してください。
+   ![Azure ポータルで VPN ゲートウェイの Entra ID 認証を設定しているスクリーンショット](/image/vpn-gateway-settings.png)
 
-    ```powershell
-    # ルート証明書を作成
-    $cert = New-SelfSignedCertificate -Type Custom -KeySpec Signature -Subject "CN=P2SRootCert" -KeyExportPolicy Exportable -HashAlgorithm sha256 -KeyLength 2048 -CertStoreLocation "Cert:\CurrentUser\My" -KeyUsageProperty Sign -KeyUsage CertSign
+    - 設定を保存したら、「VPN クライアントのダウンロード」をクリックして VPN クライアント プロファイル構成パッケージを取得します。
 
-    # クライアント証明書を作成
-    New-SelfSignedCertificate -Type Custom -DnsName P2SChildCert -KeySpec Signature -Subject "CN=P2SChildCert" -KeyExportPolicy Exportable -HashAlgorithm sha256 -KeyLength 2048 -CertStoreLocation "Cert:\CurrentUser\My" -Signer $cert -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.2")
-    ```
+3. ダウンロードした構成パッケージを確認します。
+   ダウンロードした zip ファイルを解凍し、`AzureVPN` フォルダ内に **"azurevpnconfig.xml"** が存在することを確認します。
 
-2. Windows の「**ユーザー証明書の管理**」から、作成されたルート証明書（`P2SRootCert`）を右クリック → 「全てのタスク」→「エクスポート」を選択し、ルート証明書をエクスポートします。
+4. Azure VPN クライアントに構成パッケージをインポートし、VPN 接続を確立します。
 
-    ![証明書ストアのスクリーンショット](/image/cert-store-screenshot.png)
+    > **前提**：Azure VPN クライアントがインストールされていない場合は、[こちら](https://learn.microsoft.com/ja-jp/azure/vpn-gateway/point-to-site-entra-vpn-client-windows#download) のドキュメントを参考にインストールしてください。
 
-3. Azure ポータルで **仮想ネットワーク ゲートウェイ** リソースを開き、「**ポイント対サイトの構成**」ブレードに進みます。
-   ![Azure ポータルでの VPN ゲートウェイ設定中のスクリーンショット](/image/vpn-gateway-setting.png)
-
-    - ルート証明書欄に先ほどエクスポートしたルート証明書の内容を貼り付けます。（※ 先頭行と最後の行の `-----BEGIN CERTIFICATE-----` / `-----END CERTIFICATE-----` は除外して貼り付けてください）
-    - 設定を保存したら、「VPN クライアントのダウンロード」をクリックして VPN クライアントを取得します。
-
-4. ダウンロードしたファイルを実行し、VPN 接続を確立します。
-   ![Azure と VPN 接続するためのモーダルのスクリーンショット](/image/azure-vpn-connection.png)
-
-    ![Windows 11 での VPN 設定画面のスクリーンショット](/image/windows-vpn-setting.png)
+    1. Azure VPN クライアントを起動し、左下の「**+**」をクリックして「**インポート**」を選択します。
+        ![Azure VPN クライアントのホーム画面のスクリーンショット](/image/azure-vpn-how-to-import.png)
+    2. 先ほどダウンロードした **"azurevpnconfig.xml"** を開き構成をインポートします。
+    3. 任意の接続名を入力し、「**保存**」をクリックします。
+        ![Azure VPN クライアントでの、プロファイルをインポート後の保存画面のスクリーンショット](/image/azure-vpn-save-profile.png)
+    4. 接続名のプロファイルに対して「**接続**」をクリックして接続を開始します。
+        ![Azure VPN クライアントで保存したプロファイルに接続する画面のスクリーンショット](/image/azure-vpn-how-to-connect.png)
 
 5. ターミナルやコマンド プロンプトで接続を確認します。
 
