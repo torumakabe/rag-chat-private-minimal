@@ -145,3 +145,4 @@ def indexing(blob: func.InputStream):
                 )
     except Exception as e:
         logger.error("An error occurred during processing: %s", str(e))
+        raise
