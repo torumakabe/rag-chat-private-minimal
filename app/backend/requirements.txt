@@ -8,7 +8,7 @@ azure-storage-blob==12.23.1
 azurefunctions-extensions-base==1.0.0b2
 azurefunctions-extensions-bindings-blob==1.0.0b2
 azurefunctions-extensions-http-fastapi==1.0.0b1
-python-dotenv==1.0.1
+python-dotenv==1.2.2
 langchain==0.2.17
 langchain-text-splitters==1.1.2
 openai==1.58.1
